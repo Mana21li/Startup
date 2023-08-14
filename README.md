@@ -1,63 +1,42 @@
 # Startup
+
+
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import com.payu.dao.CustomerDAOImpl;
-import com.payu.utils.DButils;
-import com.wibmo.utils.DBUtils;
+public class StudentDAOImpl implements StudentDAO {
 
-/**
- * 
- */
-public class StudentDAOImpl implements StudentDAO{
-	
-	private static volatile StudentDAOImpl instance = null;
-	 private StudentDAOImpl() {
-	    }
-	    
-	    public static StudentDAOImpl getInstance() {
-	        if (instance == null) {
-	        	//synchronized blocks thread safe the object
-	            synchronized (StudentDAOImpl.class) {
-	                instance = new StudentDAOImpl();
-	            }
-	        }
-	        return instance;
-	    }
-	    
-	    
-	    /*****************************************************************/
-	    
-	private static final Connection conn = DBUtils.getConnection();
-	 
-	 @Override
-	public boolean registerCourse(Long StudentId, List<Integer> CourseIds) {
-		
-		 return false; 
-	}
+    // ... (previous code)
 
-	@Override
-	public void getGrade(Long studentId) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public Map<Integer, String> getGrades(Long studentId) {
+        Map<Integer, String> gradesMap = new HashMap<>();
+        try {
+            String selectQuery = "SELECT course_id, grade FROM report_card WHERE student_id = ?";
+            PreparedStatement preparedStatement = conn.prepareStatement(selectQuery);
+            
+            // Set parameter
+            preparedStatement.setLong(1, studentId);
+            
+            ResultSet resultSet = preparedStatement.executeQuery();
+            
+            while (resultSet.next()) {
+                int courseId = resultSet.getInt("course_id");
+                String grade = resultSet.getString("grade");
+                gradesMap.put(courseId, grade);
+            }
+            
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return gradesMap;
+    }
 
-	@Override
-	public boolean addCourse(int courseId, Long StudentId) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean dropCourse(int courseId, Long StudentId) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void viewRegisteredCourses(Long StudentId) {
-		// TODO Auto-generated method stub
-		
-	}
+    // ... (remaining methods)
+}
